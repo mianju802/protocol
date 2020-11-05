@@ -1,0 +1,7 @@
+syntax="proto3";
+package micro.mJu.user;
+option go_package = "service/user";
+
+message Test {
+    int32 userId = 1;
+}
