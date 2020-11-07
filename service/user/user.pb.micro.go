@@ -35,6 +35,8 @@ var _ server.Option
 
 type UserService interface {
 	GetUserInfos(ctx context.Context, in *GetUserInfosReq, opts ...client.CallOption) (*GetUserInfosRsp, error)
+	UpdateInfo(ctx context.Context, in *UpdateInfoReq, opts ...client.CallOption) (*UpdateInfoRsp, error)
+	DelUserInfo(ctx context.Context, in *DelUserInfoReq, opts ...client.CallOption) (*DelUserInfoRsp, error)
 }
 
 type userService struct {
@@ -65,15 +67,39 @@ func (c *userService) GetUserInfos(ctx context.Context, in *GetUserInfosReq, opt
 	return out, nil
 }
 
+func (c *userService) UpdateInfo(ctx context.Context, in *UpdateInfoReq, opts ...client.CallOption) (*UpdateInfoRsp, error) {
+	req := c.c.NewRequest(c.name, "UserService.UpdateInfo", in)
+	out := new(UpdateInfoRsp)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userService) DelUserInfo(ctx context.Context, in *DelUserInfoReq, opts ...client.CallOption) (*DelUserInfoRsp, error) {
+	req := c.c.NewRequest(c.name, "UserService.DelUserInfo", in)
+	out := new(DelUserInfoRsp)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // Server API for UserService service
 
 type UserServiceHandler interface {
 	GetUserInfos(context.Context, *GetUserInfosReq, *GetUserInfosRsp) error
+	UpdateInfo(context.Context, *UpdateInfoReq, *UpdateInfoRsp) error
+	DelUserInfo(context.Context, *DelUserInfoReq, *DelUserInfoRsp) error
 }
 
 func RegisterUserServiceHandler(s server.Server, hdlr UserServiceHandler, opts ...server.HandlerOption) error {
 	type userService interface {
 		GetUserInfos(ctx context.Context, in *GetUserInfosReq, out *GetUserInfosRsp) error
+		UpdateInfo(ctx context.Context, in *UpdateInfoReq, out *UpdateInfoRsp) error
+		DelUserInfo(ctx context.Context, in *DelUserInfoReq, out *DelUserInfoRsp) error
 	}
 	type UserService struct {
 		userService
@@ -88,4 +114,12 @@ type userServiceHandler struct {
 
 func (h *userServiceHandler) GetUserInfos(ctx context.Context, in *GetUserInfosReq, out *GetUserInfosRsp) error {
 	return h.UserServiceHandler.GetUserInfos(ctx, in, out)
+}
+
+func (h *userServiceHandler) UpdateInfo(ctx context.Context, in *UpdateInfoReq, out *UpdateInfoRsp) error {
+	return h.UserServiceHandler.UpdateInfo(ctx, in, out)
+}
+
+func (h *userServiceHandler) DelUserInfo(ctx context.Context, in *DelUserInfoReq, out *DelUserInfoRsp) error {
+	return h.UserServiceHandler.DelUserInfo(ctx, in, out)
 }
