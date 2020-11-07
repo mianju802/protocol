@@ -9,6 +9,12 @@ import (
 	math "math"
 )
 
+import (
+	context "context"
+	client "github.com/micro/go-micro/client"
+	server "github.com/micro/go-micro/server"
+)
+
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
 var _ = fmt.Errorf
@@ -19,3 +25,67 @@ var _ = math.Inf
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
+
+// Reference imports to suppress errors if they are not otherwise used.
+var _ context.Context
+var _ client.Option
+var _ server.Option
+
+// Client API for UserService service
+
+type UserService interface {
+	GetUserInfos(ctx context.Context, in *GetUserInfosReq, opts ...client.CallOption) (*GetUserInfosRsp, error)
+}
+
+type userService struct {
+	c    client.Client
+	name string
+}
+
+func NewUserService(name string, c client.Client) UserService {
+	if c == nil {
+		c = client.NewClient()
+	}
+	if len(name) == 0 {
+		name = "micro.mJu.user"
+	}
+	return &userService{
+		c:    c,
+		name: name,
+	}
+}
+
+func (c *userService) GetUserInfos(ctx context.Context, in *GetUserInfosReq, opts ...client.CallOption) (*GetUserInfosRsp, error) {
+	req := c.c.NewRequest(c.name, "UserService.GetUserInfos", in)
+	out := new(GetUserInfosRsp)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// Server API for UserService service
+
+type UserServiceHandler interface {
+	GetUserInfos(context.Context, *GetUserInfosReq, *GetUserInfosRsp) error
+}
+
+func RegisterUserServiceHandler(s server.Server, hdlr UserServiceHandler, opts ...server.HandlerOption) error {
+	type userService interface {
+		GetUserInfos(ctx context.Context, in *GetUserInfosReq, out *GetUserInfosRsp) error
+	}
+	type UserService struct {
+		userService
+	}
+	h := &userServiceHandler{hdlr}
+	return s.Handle(s.NewHandler(&UserService{h}, opts...))
+}
+
+type userServiceHandler struct {
+	UserServiceHandler
+}
+
+func (h *userServiceHandler) GetUserInfos(ctx context.Context, in *GetUserInfosReq, out *GetUserInfosRsp) error {
+	return h.UserServiceHandler.GetUserInfos(ctx, in, out)
+}
