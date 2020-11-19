@@ -1,0 +1,16 @@
+syntax = "proto3";
+package micro.service.account;
+option go_package = "service/account;account";
+
+service AccountService {
+  rpc AccountRegister(AccountRegisterReq) returns (AccountRegisterRsp);
+}
+
+message AccountRegisterReq {
+  string userName = 1;
+  string passwd = 2;
+}
+message AccountRegisterRsp {
+  int32 code = 1;
+  string message = 2;
+}
