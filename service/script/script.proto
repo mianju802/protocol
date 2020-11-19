@@ -1,5 +1,0 @@
-syntax = "proto3";
-package micro.mJu.script;
-option go_package = "service/script";
-
-message
